@@ -3,4 +3,5 @@ export interface Solution {
   price: number;
   utility: number;
   weight: number;
+  dominanceRate?: number;
 }

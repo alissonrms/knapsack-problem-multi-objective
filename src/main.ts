@@ -1,11 +1,14 @@
 import { readItemsFile } from "./modules/data";
 import { evaluatePopulation } from "./modules/evaluator";
 import { createInitialPopulation } from "./modules/population";
+import { sortByDominance } from "./utils/utils";
+import Config from "./config/config";
 
 async function main() {
-  const items = await readItemsFile("src/assets/items.csv");
+  Config.items = await readItemsFile("src/assets/items.csv");
   const population = createInitialPopulation();
-  console.log(evaluatePopulation(population, items));
+  evaluatePopulation(population);
+  console.log(population.sort(sortByDominance).slice(0, 10));
 }
 
 main();

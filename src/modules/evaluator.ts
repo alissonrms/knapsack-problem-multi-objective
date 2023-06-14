@@ -1,5 +1,4 @@
-import { knapsackMaxWeight } from "../config/config";
-import { Item } from "../models/item";
+import Config from "../config/config";
 import { Solution } from "../models/solution";
 
 function paretoDominance(solution1: Solution, solution2: Solution): number {
@@ -19,36 +18,24 @@ function paretoDominance(solution1: Solution, solution2: Solution): number {
 }
 
 export function evaluatePopulation(
-  population: number[][],
-  items: Item[]
-): Solution[] {
-  const evaluatedPopulation: Solution[] = [];
+  population: Solution[]
+): void {
+  population.forEach((solution) => {
+    solution = calculateFitnessSolution(solution.chromosome);
+  });
 
-  for (const chromosome of population) {
-    const solution = calculateFitnessSolution(chromosome, items);
-
-    let isDominated = false;
-
-    for (const evaluatedSolution of evaluatedPopulation) {
-      const dominance = paretoDominance(solution, evaluatedSolution);
-
-      if (dominance === -1) {
-        isDominated = true;
-        break;
+  population.forEach((solution) => {
+    solution.dominanceRate = 0;
+    population.forEach((solutionToCompare) => {
+      if (paretoDominance(solution, solutionToCompare) === -1) {
+        solution.dominanceRate! += 1;
       }
-    }
-
-    if (!isDominated) {
-      evaluatedPopulation.push(solution);
-    }
-  }
-
-  return evaluatedPopulation;
+    });
+  });
 }
 
-function calculateFitnessSolution(
-  chromosome: number[],
-  items: Item[]
+export function calculateFitnessSolution(
+  chromosome: number[]
 ): Solution {
   let price = 0;
   let utility = 0;
@@ -56,13 +43,13 @@ function calculateFitnessSolution(
 
   for (let i = 0; i < chromosome.length; i++) {
     if (chromosome[i] === 1) {
-      utility += items[i].utility;
-      price += items[i].price;
-      weight += items[i].weight;
+      utility += Config.items[i].utility;
+      price += Config.items[i].price;
+      weight += Config.items[i].weight;
     }
   }
 
-  if (weight > knapsackMaxWeight) {
+  if (weight > Config.knapsackMaxWeight) {
     return { chromosome, price: 9999999, utility: 0, weight };
   }
 
