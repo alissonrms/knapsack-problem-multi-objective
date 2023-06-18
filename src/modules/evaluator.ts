@@ -1,15 +1,15 @@
 import Config from "../config/config";
 import { Solution } from "../models/solution";
 
-function paretoDominance(solution1: Solution, solution2: Solution): number {
+export function paretoDominance(solution1: Solution, solution2: Solution): number {
   if (
-    solution1.utility > solution2.utility &&
-    solution1.price < solution2.price
+    solution1.utility! > solution2.utility! &&
+    solution1.price! < solution2.price!
   ) {
     return 1; // solution1 domina solution2
   } else if (
-    solution1.utility < solution2.utility &&
-    solution1.price > solution2.price
+    solution1.utility! < solution2.utility! &&
+    solution1.price! > solution2.price!
   ) {
     return -1; // solution2 domina solution1
   } else {
@@ -17,26 +17,25 @@ function paretoDominance(solution1: Solution, solution2: Solution): number {
   }
 }
 
-export function evaluatePopulation(
-  population: Solution[]
-): void {
-  population.forEach((solution) => {
-    solution = calculateFitnessSolution(solution.chromosome);
+export function evaluatePopulation(population: Solution[]): Solution[] { 
+  population = population.map((solution) => {
+    return calculateFitnessSolution(solution.chromosome);
   });
 
-  population.forEach((solution) => {
+  population = population.map((solution) => {
     solution.dominanceRate = 0;
     population.forEach((solutionToCompare) => {
       if (paretoDominance(solution, solutionToCompare) === -1) {
         solution.dominanceRate! += 1;
       }
     });
+    return solution;
   });
+  
+  return population;
 }
 
-export function calculateFitnessSolution(
-  chromosome: number[]
-): Solution {
+export function calculateFitnessSolution(chromosome: number[]): Solution {
   let price = 0;
   let utility = 0;
   let weight = 0;
@@ -50,7 +49,7 @@ export function calculateFitnessSolution(
   }
 
   if (weight > Config.knapsackMaxWeight) {
-    return { chromosome, price: 9999999, utility: 0, weight };
+    return { chromosome, price: 999, utility: 0, weight };
   }
 
   return { chromosome, price, utility, weight };

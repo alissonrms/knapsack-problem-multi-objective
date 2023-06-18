@@ -1,18 +1,33 @@
-export function crossoverTwoPoints(parent1: number[], parent2: number[]): number[][] {
-  const child1: number[] = [];
-  const child2: number[] = [];
-  const length = parent1.length;
+import { Solution } from "../models/solution";
+import { calculateFitnessSolution } from "./evaluator";
 
-  const point1 = Math.floor(Math.random() * (length - 1)) + 1;
-  const point2 = Math.floor(Math.random() * (length - point1)) + point1;
+export function crossoverOnePoint(
+  parent1: number[],
+  parent2: number[]
+): number[][] {
+  const crossoverPoint = Math.floor(Math.random() * (parent1.length - 1)) + 1;
 
-  child1.push(...parent1.slice(0, point1));
-  child1.push(...parent2.slice(point1, point2));
-  child1.push(...parent1.slice(point2));
-
-  child2.push(...parent2.slice(0, point1));
-  child2.push(...parent1.slice(point1, point2));
-  child2.push(...parent2.slice(point2));
+  const child1 = parent1.slice(0, crossoverPoint).concat(parent2.slice(crossoverPoint));
+  const child2 = parent2.slice(0, crossoverPoint).concat(parent1.slice(crossoverPoint));
 
   return [child1, child2];
+}
+
+export function crossoverIndividuals(individuals: Solution[]): Solution[] {
+  const crossoveredIndividuals: Solution[] = [];
+
+  for (let i = 0; i < individuals.length - 1; i += 2) {
+    const [child1, child2] = crossoverOnePoint(
+      individuals[i].chromosome,
+      individuals[i + 1].chromosome
+    );
+
+    crossoveredIndividuals.push(calculateFitnessSolution(child1), calculateFitnessSolution(child2));
+  }
+
+  if (individuals.length % 2 !== 0) {
+    crossoveredIndividuals.push(individuals[individuals.length - 1]);
+  }
+
+  return crossoveredIndividuals;
 }
