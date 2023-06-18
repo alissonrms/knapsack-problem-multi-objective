@@ -84,11 +84,9 @@ async function main() {
       crossParents();
       mutateChildren();
       concatChildrenToPopulation();
-      sortPopulationByUtility();
-      population.splice(Config.populationSize);
-      // refreshPopulationEvaluation();
-      // sortPopulationByDominance();
-      // adjustPopulationSize();
+      refreshPopulationEvaluation();
+      sortPopulationByDominance();
+      adjustPopulationSize();
       console.log(findIndividualWithMaxUtility(population).utility);
     }
   }
