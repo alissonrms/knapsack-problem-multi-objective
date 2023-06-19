@@ -2,7 +2,7 @@ import Config from "./config/config";
 import { readItemsFile } from "./modules/data";
 import { evaluatePopulation, paretoDominance } from "./modules/evaluator";
 import { convertToHammingDistanceSolutions, createInitialPopulation } from "./modules/population";
-import { sortByDominance, sortByHammingDistance, sortByUtility } from "./utils/utils";
+import { sortByDominance, sortByDominanceAndHamming, sortByHammingDistance, sortByUtility } from "./utils/utils";
 import { rouletteSelection } from "./modules/selection";
 import { crossoverIndividuals, crossoverOnePoint } from "./modules/crossover";
 import { Solution } from "./models/solution";
@@ -53,26 +53,10 @@ async function main() {
     }
 
     function adjustPopulationSize() {
-      function getParetoFrontCut(): number {
-        return population[Config.populationSize].dominanceRate!;
-      }
+      const newPopulation = convertToHammingDistanceSolutions(population);
+      newPopulation.sort(sortByDominanceAndHamming)
 
-      const newPopulation: Solution[] = population.filter(
-        (solution) => solution.dominanceRate! < getParetoFrontCut()
-      );
-
-      const paretoFrontCutIndividuals = population.filter(
-        (solution) => solution.dominanceRate! === getParetoFrontCut()
-      );
-      
-      const individualsToCut = convertToHammingDistanceSolutions(paretoFrontCutIndividuals);
-      individualsToCut.sort(sortByHammingDistance)
-      while(newPopulation.length < Config.populationSize) {
-        newPopulation.push(individualsToCut[0]);
-        individualsToCut.shift();
-      }
-
-      population = newPopulation;
+      population = newPopulation.slice(0, Config.populationSize);
     }
 
     const startTime = Date.now();

@@ -14,6 +14,15 @@ export function sortByHammingDistance(
   return solution2.hammingDistance - solution1.hammingDistance;
 }
 
+export function sortByDominanceAndHamming(
+  solution1: HammingDistanceSolution,
+  solution2: HammingDistanceSolution
+): number {
+  const dominance = solution1.dominanceRate! - solution2.dominanceRate!;
+  if(dominance !== 0) return dominance;
+  return solution2.hammingDistance - solution1.hammingDistance;
+}
+
 export function sortByUtility(
   solution1: Solution,
   solution2: Solution
