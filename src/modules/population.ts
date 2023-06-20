@@ -1,18 +1,28 @@
 import Config from "../config/config";
 import { Solution } from "../models/solution";
 import { separateSolutionsByDominanceRate, sortByPrice, sortByUtility } from "../utils/utils";
+import { calculateFitnessSolution } from "./evaluator";
 
 export function generateRandomIndividuals(size: number): Solution[] {
   const individuals: Solution[] = [];
-  [...Array(size).keys()].forEach(() => {
-    const chromosome: number[] = [];
 
+  function newChromosome(): number[]{
+    const chromosome: number[] = [];
+  
     for (let j = 0; j < Config.itemsLenght; j++) {
       const gene = Math.random() > Config.randomIndividualsPercentage ? 0 : 1;
       chromosome.push(gene);
     }
+  
+    if(calculateFitnessSolution(chromosome).utility === 0){
+      return newChromosome()
+    }
+  
+    return chromosome;
+  }
 
-    individuals.push({ chromosome });
+  [...Array(size).keys()].forEach(() => {
+    individuals.push({ chromosome: newChromosome() })
   });
 
   return individuals;

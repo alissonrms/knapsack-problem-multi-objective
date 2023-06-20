@@ -1,12 +1,12 @@
 import Config from "./config/config";
 import { readItemsFile } from "./modules/data";
-import { evaluatePopulation } from "./modules/evaluator";
 import { convertToCrohnDistanceSolutions, createInitialPopulation, generateRandomIndividuals } from "./modules/population";
-import { sortByDominance, sortByDominanceAndCrohn, sortByUtility } from "./utils/utils";
+import { sortByDominance, sortByDominanceAndCrohn, sortByCrohnDistance, sortByUtility, separateSolutionsByDominanceRate, getRandomInt } from "./utils/utils";
 import { tournamentSelection } from "./modules/selection";
-import { crossoverIndividuals } from "./modules/crossover";
+import { evaluatePopulation, paretoDominance } from "./modules/evaluator";
+import { crossoverIndividuals, crossoverOnePoint } from "./modules/crossover";
 import { Solution } from "./models/solution";
-import { mutatePopulation } from "./modules/mutation";
+import { mutateIndividual, mutatePopulation } from "./modules/mutation";
 
 async function main() {
   function findIndividualWithMaxUtility(population: Solution[]) {
@@ -21,12 +21,12 @@ async function main() {
 
   function loop() {
     function checkTimeToStop(): boolean {
-      return Date.now() < startTime + Config.timeToStop || findIndividualWithMaxUtility(population).utility === 21312;
+      // return Date.now() < startTime + Config.timeToStop;
+      return generations < 500;
     }
 
     function selectParents() {
       selectedParents = tournamentSelection(population, 3);
-      // console.log(selectedParents.map(parent => parent.utility).join('-'));
     }
 
     function crossParents() {
@@ -52,29 +52,55 @@ async function main() {
       population = newPopulation.slice(0, Config.populationSize);
     }
 
-    function checkToIncreaseRandomIdividuals() {
-      if(findIndividualWithMaxUtility(population).utility === lastBestSolution) {
-        sameBestSolutionCounter++;
-        if(sameBestSolutionCounter === 200) {
-          population.push(...generateRandomIndividuals(Math.round(Config.populationSize * 0.5)))
-          Config.populationSize = population.length;
-          sameBestSolutionCounter = 0;
-          console.log('aumentando populaçao ' + population.length);
+    function manyRepetition(){
+      if(utilityHistory.length >= Config.maxRepetition){
+        const lastUtility = utilityHistory[utilityHistory.length - 1];
+        for(let i = utilityHistory.length - 2; i >= utilityHistory.length - Config.maxRepetition; i--){
+          if(utilityHistory[i] !== lastUtility) return false;
         }
-        return;
+        return true;
       }
-      sameBestSolutionCounter = 0;
+      return false;
+    }
+    
+    function mutateByFront(){
+      const newPopulation: Solution[] = [];
+      const paretoFronts = separateSolutionsByDominanceRate(population);
+
+      for(const key in paretoFronts){
+        const front = paretoFronts[key];
+
+        for (let i = 0; i < 20; i++) {
+          let individualToMutate = getRandomInt(0, front.length - 1);
+          front[individualToMutate] = mutateIndividual(front[individualToMutate]);
+        }
+
+        newPopulation.push(...front);
+      }
+
+      population = newPopulation;
+    }
+
+    function verifyHistory(){
+      if(Config.populationSize >= Config.maxPopulation) return;
+      utilityHistory.push(findIndividualWithMaxUtility(population).utility!);
+      if(manyRepetition()){
+        console.log("-----------nova população---------")
+        mutateByFront();
+        utilityHistory = [utilityHistory.length - 1];
+        Config.populationSize += Config.individualsToIncrement;
+        const newIndividuals = generateRandomIndividuals(Config.individualsToIncrement);
+        population.push(...newIndividuals);
+        refreshPopulationEvaluation();
+      }
     }
 
     const startTime = Date.now();
     let selectedParents: Solution[] = [];
     let children: Solution[] = [];
     let generations = 0;
-    let sameBestSolutionCounter = 0;
-    let lastBestSolution = 0;
-
+    let utilityHistory: number[] = [];
     while (checkTimeToStop()) {
-      lastBestSolution = findIndividualWithMaxUtility(population).utility!;
       selectParents();
       crossParents();
       mutateChildren();
@@ -82,7 +108,7 @@ async function main() {
       refreshPopulationEvaluation();
       adjustPopulationSize();
       console.log(findIndividualWithMaxUtility(population).utility);
-      checkToIncreaseRandomIdividuals();
+      verifyHistory()
       generations++;
     }
     console.log(`Gerações: ${generations}`);

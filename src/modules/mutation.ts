@@ -16,3 +16,13 @@ export function mutatePopulation(population: Solution[]): Solution[] {
 
   return mutatedPopulation;
 }
+
+export function mutateIndividual(solution: Solution): Solution {
+  solution.chromosome = solution.chromosome.map(chromosome => {
+    if(Math.random() > Config.mutationRate) {
+      return Math.random() > 0.01 ? 0 : 1;
+    }
+    return chromosome
+  })
+  return solution;
+}
