@@ -1,7 +1,10 @@
 import Config from "../config/config";
 import { Solution } from "../models/solution";
 
-export function paretoDominance(solution1: Solution, solution2: Solution): number {
+export function paretoDominance(
+  solution1: Solution,
+  solution2: Solution
+): number {
   if (
     solution1.utility! > solution2.utility! &&
     solution1.price! < solution2.price!
@@ -17,7 +20,7 @@ export function paretoDominance(solution1: Solution, solution2: Solution): numbe
   }
 }
 
-export function evaluatePopulation(population: Solution[]): Solution[] { 
+export function evaluatePopulation(population: Solution[]): Solution[] {
   population = population.map((solution) => {
     return calculateFitnessSolution(solution.chromosome);
   });
@@ -31,7 +34,7 @@ export function evaluatePopulation(population: Solution[]): Solution[] {
     });
     return solution;
   });
-  
+
   return population;
 }
 
@@ -49,8 +52,13 @@ export function calculateFitnessSolution(chromosome: number[]): Solution {
   }
 
   if (weight > Config.knapsackMaxWeight) {
-    return { chromosome, price: 999, utility: 0, weight };
+    return { chromosome: chromosome, price: 999, utility: 0, weight: weight };
   }
 
-  return { chromosome, price, utility, weight };
+  return {
+    chromosome: chromosome,
+    price: price,
+    utility: utility,
+    weight: weight,
+  };
 }

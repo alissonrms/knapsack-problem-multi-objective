@@ -4,5 +4,5 @@ export interface Solution {
   utility?: number;
   weight?: number;
   dominanceRate?: number;
-  hammingDistance?: number;
+  crohnDistance?: number;
 }

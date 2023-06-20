@@ -1,9 +1,9 @@
 import Config from "./config/config";
 import { readItemsFile } from "./modules/data";
 import { evaluatePopulation, paretoDominance } from "./modules/evaluator";
-import { convertToHammingDistanceSolutions, createInitialPopulation } from "./modules/population";
-import { sortByDominance, sortByDominanceAndHamming, sortByHammingDistance, sortByUtility } from "./utils/utils";
-import { rouletteSelection } from "./modules/selection";
+import { convertToCrohnDistanceSolutions, createInitialPopulation } from "./modules/population";
+import { sortByDominance, sortByDominanceAndCrohn, sortByCrohnDistance, sortByUtility } from "./utils/utils";
+import { tournamentSelection } from "./modules/selection";
 import { crossoverIndividuals, crossoverOnePoint } from "./modules/crossover";
 import { Solution } from "./models/solution";
 import { mutatePopulation } from "./modules/mutation";
@@ -21,11 +21,12 @@ async function main() {
 
   function loop() {
     function checkTimeToStop(): boolean {
-      return Date.now() < startTime + Config.secondsToStop;
+      return Date.now() < startTime + Config.timeToStop;
     }
 
     function selectParents() {
-      selectedParents = rouletteSelection(population);
+      selectedParents = tournamentSelection(population, 3);
+      // console.log(selectedParents.map(parent => parent.utility).join('-'));
     }
 
     function crossParents() {
@@ -53,8 +54,8 @@ async function main() {
     }
 
     function adjustPopulationSize() {
-      const newPopulation = convertToHammingDistanceSolutions(population);
-      newPopulation.sort(sortByDominanceAndHamming)
+      const newPopulation = convertToCrohnDistanceSolutions(population);
+      newPopulation.sort(sortByDominanceAndCrohn)
 
       population = newPopulation.slice(0, Config.populationSize);
     }
@@ -62,16 +63,19 @@ async function main() {
     const startTime = Date.now();
     let selectedParents: Solution[] = [];
     let children: Solution[] = [];
-
+    let generations = 0;
     while (checkTimeToStop()) {
       selectParents();
       crossParents();
       mutateChildren();
       concatChildrenToPopulation();
       refreshPopulationEvaluation();
+      population.sort(sortByDominance);
       adjustPopulationSize();
       console.log(findIndividualWithMaxUtility(population).utility);
+      generations++;
     }
+    console.log(`Gerações: ${generations}`);
   }
 
   Config.items = await readItemsFile("src/assets/items.csv");

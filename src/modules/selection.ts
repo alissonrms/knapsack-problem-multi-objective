@@ -1,39 +1,29 @@
 import { Solution } from "../models/solution";
 
-export function rouletteSelection(population: Solution[]): Solution[] {
-  function refreshProbabilitiesArray(): number[] {
-    return populationCopy.map((solution) => {
-      return solution[sortMethod]! / totalFitness;
-    });
+export function tournamentSelection(population: Solution[], tournamentSize: number): Solution[] {
+  function getRandomIndex(): number {
+    return Math.floor(Math.random() * population.length);
   }
 
-  const populationCopy = [...population];
+  function selectParent(): Solution {
+    let bestSolution: Solution | undefined;
+    for (let i = 0; i < tournamentSize; i++) {
+      const randomIndex = getRandomIndex();
+      const candidate = population[randomIndex];
 
-  const sortMethod = Math.random() > 0.5 ? "utility" : "price";
+      if (!bestSolution || candidate.utility! > bestSolution.utility!) {
+        bestSolution = candidate;
+      }
+    }
+    return bestSolution!;
+  }
 
-  const totalFitness = populationCopy.reduce(
-    (sum, solution) => sum + solution[sortMethod]!,
-    0
-  );
-  let selectionProbabilities = refreshProbabilitiesArray();
   const selectedPopulation: Solution[] = [];
 
   while (selectedPopulation.length < population.length) {
-    let cumulativeProbability = 0;
-    const randomValue = Math.random();
-    selectionProbabilities = refreshProbabilitiesArray();
-
-    for (let i = 0; i < populationCopy.length; i++) {
-      cumulativeProbability +=
-        sortMethod === "utility"
-          ? selectionProbabilities[i]
-          : 1 / selectionProbabilities[i];
-
-      if (randomValue <= cumulativeProbability) {
-        selectedPopulation.push(populationCopy[i]);
-        break;
-      }
-    }
+    const parent1 = selectParent();
+    const parent2 = selectParent();
+    selectedPopulation.push(parent1, parent2);
   }
 
   return selectedPopulation;

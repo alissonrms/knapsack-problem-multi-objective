@@ -7,8 +7,12 @@ export function crossoverOnePoint(
 ): number[][] {
   const crossoverPoint = Math.floor(Math.random() * (parent1.length - 1)) + 1;
 
-  const child1 = parent1.slice(0, crossoverPoint).concat(parent2.slice(crossoverPoint));
-  const child2 = parent2.slice(0, crossoverPoint).concat(parent1.slice(crossoverPoint));
+  const child1 = parent1
+    .slice(0, crossoverPoint)
+    .concat(parent2.slice(crossoverPoint));
+  const child2 = parent2
+    .slice(0, crossoverPoint)
+    .concat(parent1.slice(crossoverPoint));
 
   return [child1, child2];
 }
@@ -22,11 +26,8 @@ export function crossoverIndividuals(individuals: Solution[]): Solution[] {
       individuals[i + 1].chromosome
     );
 
-    crossoveredIndividuals.push(calculateFitnessSolution(child1), calculateFitnessSolution(child2));
-  }
-
-  if (individuals.length % 2 !== 0) {
-    crossoveredIndividuals.push(individuals[individuals.length - 1]);
+    crossoveredIndividuals.push(calculateFitnessSolution(child1));
+    crossoveredIndividuals.push(calculateFitnessSolution(child2));
   }
 
   return crossoveredIndividuals;

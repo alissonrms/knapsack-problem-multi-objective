@@ -9,7 +9,7 @@ export function generateRandomIndividuals(size: number): Solution[] {
     const chromosome: number[] = [];
 
     for (let j = 0; j < Config.itemsLenght; j++) {
-      const gene = Math.random() < Config.randomIndividualsPercentage ? 1 : 0;
+      const gene = Math.random() > Config.randomIndividualsPercentage ? 0 : 1;
       chromosome.push(gene);
     }
 
@@ -23,7 +23,7 @@ export function createInitialPopulation(): Solution[] {
   return generateRandomIndividuals(Config.populationSize);
 }
 
-export function convertToHammingDistanceSolutions(
+export function convertToCrohnDistanceSolutions(
   solutions: Solution[]
 ): Solution[] {
   const paretoFronts = separateSolutionsByDominanceRate(solutions);
@@ -32,15 +32,15 @@ export function convertToHammingDistanceSolutions(
   for (const key in paretoFronts) {
     const front = paretoFronts[key];
     front.sort(sortByUtility);
-    front[0].hammingDistance = Number.MAX_VALUE;
-    front[front.length - 1].hammingDistance = Number.MAX_VALUE;
+    front[0].crohnDistance = Number.MAX_VALUE;
+    front[front.length - 1].crohnDistance = Number.MAX_VALUE;
 
     for (let i = 1; i < front.length - 1; i++) {
-      if (!front[i].hammingDistance) front[i].hammingDistance = 0;
+      if (!front[i].crohnDistance) front[i].crohnDistance = 0;
       let distance =
         (front[i - 1].utility! - front[i + 1].utility!) /
         (front[0].utility! - front[front.length - 1].utility!);
-      front[i].hammingDistance! += distance;
+      front[i].crohnDistance! += distance;
     }
 
     // Adicionar as soluções processadas ao array de saída
@@ -50,15 +50,15 @@ export function convertToHammingDistanceSolutions(
   for (const key in paretoFronts) {
     const front = paretoFronts[key];
     front.sort(sortByPrice);
-    front[0].hammingDistance = Number.MAX_VALUE;
-    front[front.length - 1].hammingDistance = Number.MAX_VALUE;
+    front[0].crohnDistance = Number.MAX_VALUE;
+    front[front.length - 1].crohnDistance = Number.MAX_VALUE;
 
     for (let i = 1; i < front.length - 1; i++) {
-      if (!front[i].hammingDistance) front[i].hammingDistance = 0;
+      if (!front[i].crohnDistance) front[i].crohnDistance = 0;
       let distance =
         (front[i + 1].price! - front[i - 1].price!) /
         (front[front.length - 1].price! - front[0].price!);
-      front[i].hammingDistance! += distance;
+      front[i].crohnDistance! += distance;
     }
 
     // Adicionar as soluções processadas ao array de saída
