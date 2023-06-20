@@ -27,7 +27,7 @@ export function convertToCrohnDistanceSolutions(
   solutions: Solution[]
 ): Solution[] {
   const paretoFronts = separateSolutionsByDominanceRate(solutions);
-  const hammingDistanceSolutions: Solution[] = [];
+  const crohnDistanceSolutions: Solution[] = [];
 
   for (const key in paretoFronts) {
     const front = paretoFronts[key];
@@ -44,7 +44,7 @@ export function convertToCrohnDistanceSolutions(
     }
 
     // Adicionar as soluções processadas ao array de saída
-    hammingDistanceSolutions.push(...front);
+    crohnDistanceSolutions.push(...front);
   }
 
   for (const key in paretoFronts) {
@@ -62,8 +62,8 @@ export function convertToCrohnDistanceSolutions(
     }
 
     // Adicionar as soluções processadas ao array de saída
-    hammingDistanceSolutions.push(...front);
+    crohnDistanceSolutions.push(...front);
   }
 
-  return hammingDistanceSolutions;
+  return crohnDistanceSolutions;
 }
