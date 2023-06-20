@@ -1,10 +1,10 @@
 import Config from "./config/config";
 import { readItemsFile } from "./modules/data";
 import { convertToCrohnDistanceSolutions, createInitialPopulation, generateRandomIndividuals } from "./modules/population";
-import { sortByDominance, sortByDominanceAndCrohn, sortByCrohnDistance, sortByUtility, separateSolutionsByDominanceRate, getRandomInt } from "./utils/utils";
+import { sortByDominanceAndCrohn, separateSolutionsByDominanceRate, getRandomInt } from "./utils/utils";
 import { tournamentSelection } from "./modules/selection";
-import { evaluatePopulation, paretoDominance } from "./modules/evaluator";
-import { crossoverIndividuals, crossoverOnePoint } from "./modules/crossover";
+import { evaluatePopulation } from "./modules/evaluator";
+import { crossoverIndividuals } from "./modules/crossover";
 import { Solution } from "./models/solution";
 import { mutateIndividual, mutatePopulation } from "./modules/mutation";
 
@@ -21,12 +21,11 @@ async function main() {
 
   function loop() {
     function checkTimeToStop(): boolean {
-      // return Date.now() < startTime + Config.timeToStop;
-      return generations < 500;
+      return Date.now() < startTime + Config.timeToStop || findIndividualWithMaxUtility(population).utility === 21312;
     }
 
     function selectParents() {
-      selectedParents = tournamentSelection(population, 3);
+      selectedParents = tournamentSelection(population, 7);
     }
 
     function crossParents() {
@@ -85,14 +84,16 @@ async function main() {
       if(Config.populationSize >= Config.maxPopulation) return;
       utilityHistory.push(findIndividualWithMaxUtility(population).utility!);
       if(manyRepetition()){
-        console.log("-----------nova população---------")
         mutateByFront();
         utilityHistory = [utilityHistory.length - 1];
         Config.populationSize += Config.individualsToIncrement;
         const newIndividuals = generateRandomIndividuals(Config.individualsToIncrement);
         population.push(...newIndividuals);
         refreshPopulationEvaluation();
+        Config.mutationRate += 0.001;
+        return;
       }
+      Config.mutationRate = Config.initialMutationRate;
     }
 
     const startTime = Date.now();

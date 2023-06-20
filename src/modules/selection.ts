@@ -1,5 +1,4 @@
 import { Solution } from "../models/solution";
-import { getRandomInt } from "../utils/utils";
 
 export function tournamentSelection(population: Solution[], tournamentSize: number): Solution[] {
   function getRandomIndex(): number {
@@ -27,6 +26,5 @@ export function tournamentSelection(population: Solution[], tournamentSize: numb
     selectedPopulation.push(parent1, parent2);
   }
 
-  // console.log(selectedPopulation.map(s => s.utility));
   return selectedPopulation;
 }
