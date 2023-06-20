@@ -1,7 +1,6 @@
 import Config from "../config/config";
 import { Solution } from "../models/solution";
-import { separateSolutionsByDominanceRate, sortByDominance, sortByPrice, sortByUtility } from "../utils/utils";
-import { calculateFitnessSolution } from "./evaluator";
+import { separateSolutionsByDominanceRate, sortByPrice, sortByUtility } from "../utils/utils";
 
 export function generateRandomIndividuals(size: number): Solution[] {
   const individuals: Solution[] = [];
