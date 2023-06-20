@@ -69,7 +69,6 @@ async function main() {
       mutateChildren();
       concatChildrenToPopulation();
       refreshPopulationEvaluation();
-      sortPopulationByDominance();
       adjustPopulationSize();
       console.log(findIndividualWithMaxUtility(population).utility);
     }

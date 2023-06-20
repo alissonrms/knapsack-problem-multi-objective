@@ -4,8 +4,5 @@ export interface Solution {
   utility?: number;
   weight?: number;
   dominanceRate?: number;
-}
-
-export interface HammingDistanceSolution extends Solution {
-  hammingDistance: number;
+  hammingDistance?: number;
 }

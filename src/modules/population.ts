@@ -1,5 +1,6 @@
 import Config from "../config/config";
-import { HammingDistanceSolution, Solution } from "../models/solution";
+import { Solution } from "../models/solution";
+import { separateSolutionsByDominanceRate, sortByDominance, sortByPrice, sortByUtility } from "../utils/utils";
 import { calculateFitnessSolution } from "./evaluator";
 
 export function generateRandomIndividuals(size: number): Solution[] {
@@ -24,19 +25,45 @@ export function createInitialPopulation(): Solution[] {
 
 export function convertToHammingDistanceSolutions(
   solutions: Solution[]
-): HammingDistanceSolution[] {
-  return solutions.map((currentSolution) => ({
-    ...currentSolution,
-    hammingDistance: solutions.reduce((distance, compareSolution) => {
-      if (currentSolution !== compareSolution) {
-        distance += currentSolution.chromosome.reduce((count, value, index) => {
-          if (value !== compareSolution.chromosome[index]) {
-            count++;
-          }
-          return count;
-        }, 0);
-      }
-      return distance;
-    }, 0),
-  }));
+): Solution[] {
+  const paretoFronts = separateSolutionsByDominanceRate(solutions);
+  const hammingDistanceSolutions: Solution[] = [];
+
+  for (const key in paretoFronts) {
+    const front = paretoFronts[key];
+    front.sort(sortByUtility);
+    front[0].hammingDistance = Number.MAX_VALUE;
+    front[front.length - 1].hammingDistance = Number.MAX_VALUE;
+
+    for (let i = 1; i < front.length - 1; i++) {
+      if (!front[i].hammingDistance) front[i].hammingDistance = 0;
+      let distance =
+        (front[i - 1].utility! - front[i + 1].utility!) /
+        (front[0].utility! - front[front.length - 1].utility!);
+      front[i].hammingDistance! += distance;
+    }
+
+    // Adicionar as soluções processadas ao array de saída
+    hammingDistanceSolutions.push(...front);
+  }
+
+  for (const key in paretoFronts) {
+    const front = paretoFronts[key];
+    front.sort(sortByPrice);
+    front[0].hammingDistance = Number.MAX_VALUE;
+    front[front.length - 1].hammingDistance = Number.MAX_VALUE;
+
+    for (let i = 1; i < front.length - 1; i++) {
+      if (!front[i].hammingDistance) front[i].hammingDistance = 0;
+      let distance =
+        (front[i + 1].price! - front[i - 1].price!) /
+        (front[front.length - 1].price! - front[0].price!);
+      front[i].hammingDistance! += distance;
+    }
+
+    // Adicionar as soluções processadas ao array de saída
+    hammingDistanceSolutions.push(...front);
+  }
+
+  return hammingDistanceSolutions;
 }

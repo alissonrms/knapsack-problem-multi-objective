@@ -1,4 +1,4 @@
-import { HammingDistanceSolution, Solution } from "../models/solution";
+import { Solution } from "../models/solution";
 
 export function sortByDominance(
   solution1: Solution,
@@ -8,19 +8,19 @@ export function sortByDominance(
 }
 
 export function sortByHammingDistance(
-  solution1: HammingDistanceSolution,
-  solution2: HammingDistanceSolution
+  solution1: Solution,
+  solution2: Solution
 ): number {
-  return solution2.hammingDistance - solution1.hammingDistance;
+  return solution2.hammingDistance! - solution1.hammingDistance!;
 }
 
 export function sortByDominanceAndHamming(
-  solution1: HammingDistanceSolution,
-  solution2: HammingDistanceSolution
+  solution1: Solution,
+  solution2: Solution
 ): number {
   const dominance = solution1.dominanceRate! - solution2.dominanceRate!;
   if(dominance !== 0) return dominance;
-  return solution2.hammingDistance - solution1.hammingDistance;
+  return solution2.hammingDistance! - solution1.hammingDistance!;
 }
 
 export function sortByUtility(
@@ -29,3 +29,30 @@ export function sortByUtility(
 ): number {
   return solution2.utility! - solution1.utility!;
 }
+
+export function sortByPrice(
+  solution1: Solution,
+  solution2: Solution
+): number {
+  return solution1.price! - solution2.price!;
+}
+
+// Função para separar as soluções com o mesmo dominanceRate em diferentes grupos
+export function separateSolutionsByDominanceRate(solutions: Solution[]) {
+  const solutionGroups: { [key: number]: Solution[] } = {};
+
+  for (const solution of solutions) {
+    const dominanceRate = solution.dominanceRate!;
+
+    if (!solutionGroups[dominanceRate]) {
+      // Se o grupo para o dominanceRate ainda não existe, cria um novo array
+      solutionGroups[dominanceRate] = [solution];
+    } else {
+      // Se o grupo para o dominanceRate já existe, adiciona a solução ao array existente
+      solutionGroups[dominanceRate].push(solution);
+    }
+  }
+
+  return solutionGroups;
+}
+
